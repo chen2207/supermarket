@@ -1,12 +1,20 @@
 <template>
   <div id='home'>
     <nav-bar class="home-nav"><div slot='center'>购物街</div></nav-bar>
-    <home-swiper :banners='banners'></home-swiper>
-    <recommend-view :recommends='recommends'></recommend-view>
-    <feature-view/>
-    <tab-control :titles="['流行','新款','经典']" class="tab-control"
-                  @tabclick='tabClick'></tab-control>
-    <goods-list :goods="goods[curIndex].list"></goods-list>
+    <scroll class="content" ref="scroll" 
+            :probeType="3" 
+            @scroll="contentScroll" 
+            :pullUpLoad="true"
+            @pullingUp='pullingUp'>
+      <home-swiper :banners='banners' @swiperImageLoad='swiperImageLoad'></home-swiper>
+      <recommend-view :recommends='recommends'></recommend-view>
+      <feature-view/>
+      <tab-control :titles="['流行','新款','经典']" class="tab-control"
+                    @tabclick='tabClick'
+                    ref="tabControl"></tab-control>
+      <goods-list :goods="goods[curIndex].list"></goods-list>
+    </scroll>
+    <back-top @click.native='backClick' v-show="isShow"></back-top>
   </div>
 </template>
 
@@ -17,6 +25,8 @@ import RecommendView from '@/views/Home/childComps/RecommensView.vue'
 import FeatureView from '@/views/Home/childComps/FeatureView.vue'
 import TabControl from '@/components/content/TabControl/TabControl.vue'
 import GoodsList from '@/components/content/goods/GoodsList.vue'
+import Scroll from '@/components/common/srcoll/scroll.vue'
+import BackTop from '@/components/content/backTop/BackTop.vue'
 import {getHomeMultidata,getHomeGoods} from '@/network/home.js'
 
 export default {
@@ -27,6 +37,8 @@ export default {
     FeatureView,
     TabControl,
     GoodsList,
+    Scroll,
+    BackTop
   },
   data(){
     return {
@@ -37,7 +49,10 @@ export default {
         'new':{page:0,list:[]},
         'sell':{page:0,list:[]},
       },
-      curIndex:'pop'
+      curIndex:'pop',
+      isShow:false,
+      tabOffsetTop:0,
+      isTabFixed:false,
     }
   },
   created(){
@@ -45,6 +60,11 @@ export default {
    this.getHomeGoods('pop')
    this.getHomeGoods('sell')
    this.getHomeGoods('new')
+  },
+  mounted(){
+    this.$bus.$on('itemImageLoad',()=>{
+      this.$refs.scroll.scroll.refresh()
+    })
   },
   methods:{
     getHomeMultidata(){
@@ -58,9 +78,10 @@ export default {
       // 请求商品数据
       const page=this.goods[type].page+1
       getHomeGoods(type,page).then(res=>{
-        console.log(res);
         this.goods[type].list.push(...res.data.list)
-    })
+        this.goods[type].page++
+        this.$refs.scroll.scroll.finishPullUp()
+    }).catch(err=>err)
     },
     tabClick(index){
       switch(index){
@@ -73,6 +94,25 @@ export default {
         case 2:
           this.curIndex='sell'
       }
+    },
+    backClick(){
+      this.$refs.scroll.scroll.scrollTo(0,0,500)
+    },
+    contentScroll(position){
+      // 判断backTop是否显示
+      this.isShow=position.y<-1000?true:false
+      // 决定是否吸顶
+      if(-position.y>this.tabOffsetTop){
+        this.isTabFixed=true
+      }else{
+        this.isTabFixed=false
+      }
+    },
+    pullingUp(){
+      this.getHomeGoods(this.curIndex)
+    },
+    swiperImageLoad(){
+      this.tabOffsetTop=this.$refs.tabControl.$el.offsetTop
     }
   }
 }
@@ -80,8 +120,7 @@ export default {
 
 <style scoped>
   #home {
-    padding-top:44px;
-    margin-bottom: 54px;
+    height: 100vh;
   } 
   .home-nav {
     background-color: var(--color-tint);
@@ -96,6 +135,11 @@ export default {
     background-color: #fff;
     position: sticky;
     top:44px;
-    z-index:1;
+    z-index:-1;
   }
+  .content {
+    height: calc(100% - 93px);
+    overflow: hidden;
+    margin-top: 44px;
+  } 
 </style>
