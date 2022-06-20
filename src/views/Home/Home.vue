@@ -1,6 +1,10 @@
 <template>
   <div id='home'>
     <nav-bar class="home-nav"><div slot='center'>购物街</div></nav-bar>
+    <tab-control :titles="['流行','新款','经典']" class="tab-control"
+                    @tabclick='tabClick'
+                    ref="tabControl1"
+                    v-show="isTabFixed"></tab-control>
     <scroll class="content" ref="scroll" 
             :probeType="3" 
             @scroll="contentScroll" 
@@ -11,7 +15,8 @@
       <feature-view/>
       <tab-control :titles="['流行','新款','经典']" class="tab-control"
                     @tabclick='tabClick'
-                    ref="tabControl"></tab-control>
+                    ref="tabControl"
+                    v-show="!isTabFixed"></tab-control>
       <goods-list :goods="goods[curIndex].list"></goods-list>
     </scroll>
     <back-top @click.native='backClick' v-show="isShow"></back-top>
@@ -63,7 +68,10 @@ export default {
   },
   mounted(){
     this.$bus.$on('itemImageLoad',()=>{
+      try{
       this.$refs.scroll.scroll.refresh()
+      }catch(err){
+      }
     })
   },
   methods:{
@@ -94,6 +102,8 @@ export default {
         case 2:
           this.curIndex='sell'
       }
+      this.$refs.tabControl1.curIndex=index
+      this.$refs.tabControl.curIndex=index
     },
     backClick(){
       this.$refs.scroll.scroll.scrollTo(0,0,500)
@@ -125,21 +135,22 @@ export default {
   .home-nav {
     background-color: var(--color-tint);
     color: #fff;
-    position: fixed;
+    /* position: fixed;
     left: 0;
     right: 0;
-    top: 0;
+    top: 0; */
     z-index:1;
   }
   .tab-control {
     background-color: #fff;
     position: sticky;
-    top:44px;
-    z-index:-1;
+    top: 44px;
+    z-index:100;
   }
   .content {
     height: calc(100% - 93px);
     overflow: hidden;
-    margin-top: 44px;
+    /* margin-top: 44px; */
+    padding-bottom: 44px;
   } 
 </style>
