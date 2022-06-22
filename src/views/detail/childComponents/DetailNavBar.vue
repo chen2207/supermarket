@@ -27,11 +27,12 @@ export default {
   methods:{
     itemClick(item){
       this.curitem=item
+      this.$emit('titlesClick',item)
     },
     backClick(){
       this.$router.go(-1)
     }
-  }
+  },
 }
 </script>
 

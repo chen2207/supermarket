@@ -67,7 +67,7 @@ export default {
    this.getHomeGoods('new')
   },
   mounted(){
-    this.$bus.$on('itemImageLoad',()=>{
+    this.$bus.$on('homeitemImageLoad',()=>{
       try{
       this.$refs.scroll.scroll.refresh()
       }catch(err){
