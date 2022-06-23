@@ -19,13 +19,16 @@ const store = new Vuex.Store({
         oldproduct.count += 1
       } else {
         payload.count = 1
-        state.cartList.push(payload)
+        state.cartList.push({ ...payload, checked: false })
       }
     }
   },
   getters: {
     cartLength(state) {
       return state.cartList.length
+    },
+    cartList(state) {
+      return state.cartList
     }
   }
 })

@@ -4,7 +4,7 @@
       <CheckButton @checkBtnClick="checkedChange" v-model="itemInfo.checked"></CheckButton>
     </div>
     <div class="item-img">
-      <img :src="itemInfo.imgURL" alt="商品图片">
+      <img :src="itemInfo.image" alt="商品图片">
     </div>
     <div class="item-info">
       <div class="item-title">{{itemInfo.title}}</div>
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-  import CheckButton from './CheckButton'
+  import CheckButton from '@/views/Cart/childCompos/CheckButton.vue'
 
   export default {
     name: "ShopCartItem",
@@ -30,8 +30,8 @@
     },
     methods: {
       checkedChange: function () {
-        this.itemInfo.checked = !this.itemInfo.checked;
-      }
+        this.itemInfo.checked = !this.itemInfo.checked
+      },
     }
   }
 </script>
